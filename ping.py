@@ -1,14 +1,36 @@
-import subprocess
+import sys
 import os
-'''
-servers.txt contains ip address in following format
-192.168.1.1
-192.168.1.2
-'''
-with open('cspc devices.txt', 'r') as f:
-        for ip in f:
-            result=subprocess.Popen(["ping", "-c", "1", "-n", "-W", "2",    ip],stdout=f, stderr=f).wait()
-            if result:
-                print(ip, "inactive")
-            else:
-                print(ip, "active")
+import platform
+import subprocess
+
+plat = platform.system()
+print plat
+scriptDir = sys.path[0]
+hosts = os.path.join(scriptDir, 'cspc devices.txt')
+hostsFile = open(hosts, "r")
+lines = hostsFile.readlines()
+if plat == "Windows":
+    for line in lines:
+        line = line.strip( )
+        ping = subprocess.Popen(
+            ["ping", "-n", "2", "-l", "1", "-w", "100", line],
+            stdout = subprocess.PIPE,
+            stderr = subprocess.PIPE
+        )
+        out, error = ping.communicate()
+        print out
+        print error
+
+if plat == "Linux":
+    for line in lines:
+        line = line.strip( )
+        ping = subprocess.Popen(
+            ["ping", "-c", "1", "-l", "1", "-s", "1", "-W", "1", line],
+            stdout = subprocess.PIPE,
+            stderr = subprocess.PIPE
+        )
+        out, error = ping.communicate()
+        print out
+        print error
+
+hostsFile.close()
